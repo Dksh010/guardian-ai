@@ -1,41 +1,43 @@
 import json
 from rag_llm.engine import GuardianEngine
 
+
+TEST_SCENARIOS = [
+    {
+        "title": "Scenario 1: Clean Banter",
+        "messages": [
+            ("PlayerOne", "Nice shot mate!"),
+            ("GamerBoy", "Too easy, diff gap in mid lane.")
+        ]
+    },
+    {
+        "title": "Scenario 2: Gender Harassment",
+        "messages": [
+            ("GamerGirl99", "I'll cover point B guys."),
+            ("ToxikUser", "Is that a girl on mic? Go back to the kitchen and make me a sandwich.")
+        ]
+    },
+    {
+        "title": "Scenario 3: Leetspeak Filter Evasion",
+        "messages": [
+            ("SaltyPlayer", "you trash zero skill"),
+            ("SaltyPlayer", "g0 k1ll ur53lf un1st4ll l1f3")
+        ]
+    },
+    {
+        "title": "Scenario 4: Multi-Turn Child Safety Violation",
+        "messages": [
+            ("MiniGamer", "im only 10 years old this game is hard"),
+            ("PredatorX", "cool what school do you go to? add me on snapchat right now")
+        ]
+    }
+]
+
+
 def run_test_suite():
     engine = GuardianEngine()
 
-    scenarios = [
-        {
-            "title": "Scenario 1: Clean Banter",
-            "messages": [
-                ("PlayerOne", "Nice shot mate!"),
-                ("GamerBoy", "Too easy, diff gap in mid lane.")
-            ]
-        },
-        {
-            "title": "Scenario 2: Gender Harassment",
-            "messages": [
-                ("GamerGirl99", "I'll cover point B guys."),
-                ("ToxikUser", "Is that a girl on mic? Go back to the kitchen and make me a sandwich.")
-            ]
-        },
-        {
-            "title": "Scenario 3: Leetspeak Filter Evasion",
-            "messages": [
-                ("SaltyPlayer", "you trash zero skill"),
-                ("SaltyPlayer", "g0 k1ll ur53lf un1st4ll l1f3")
-            ]
-        },
-        {
-            "title": "Scenario 4: Multi-Turn Child Safety Violation",
-            "messages": [
-                ("MiniGamer", "im only 10 years old this game is hard"),
-                ("PredatorX", "cool what school do you go to? add me on snapchat right now")
-            ]
-        }
-    ]
-
-    for scenario in scenarios:
+    for scenario in TEST_SCENARIOS:
         print(f"\n==================================================")
         print(f"RUNNING: {scenario['title']}")
         print(f"==================================================")

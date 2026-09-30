@@ -1,0 +1,16 @@
+ipykernel
+ipywidgets
+jupyterlab
+joblib
+matplotlib
+numpy
+pandas
+scikit-learn
+seaborn
+xgboost
+chromadb
+sentence-transformers
+google-genai
+python-dotenv
+pydantic
+streamlit
