@@ -2,7 +2,6 @@ SAFETY_RULES = [
     {
         "rule_id": "RULE_101",
         "category": "Gender Harassment & Sexism",
-        "label": 2,
         "content": (
             "RULE 101: Targeted Gender Harassment, Misogyny & Sexism.\n"
             "• Prohibited: Any derogatory, degrading, or hostile remarks directed at female, non-binary, or LGBTQ+ players. "
@@ -15,7 +14,6 @@ SAFETY_RULES = [
     {
         "rule_id": "RULE_102",
         "category": "Child Safety & Predatory Grooming",
-        "label": 2,
         "content": (
             "RULE 102: Child Exploitation, Grooming & Private Information Solicitation.\n"
             "• Prohibited: Asking self-identified minors (or players indicating under-18 age/schooling) for real-world personal details. "
@@ -27,7 +25,6 @@ SAFETY_RULES = [
     {
         "rule_id": "RULE_103",
         "category": "Evasive Toxicity, Self-Harm & Leetspeak Bypasses",
-        "label": 2,
         "content": (
             "RULE 103: Filter Evasion, Self-Harm Encouragement & Severe Abuse.\n"
             "• Prohibited: Using special characters, numbers, misspellings, or leetspeak to bypass chat filters while encouraging suicide or self-harm "
@@ -39,7 +36,6 @@ SAFETY_RULES = [
     {
         "rule_id": "RULE_104",
         "category": "Targeted Bullying & Multi-Turn Harassment",
-        "label": 1,
         "content": (
             "RULE 104: Multi-Turn Harassment & Targeted Stalking/Griefing.\n"
             "• Prohibited: Repeatedly sending hostile, insulting, or belittling messages across multiple turns aimed at a single player to ruin their experience, "
@@ -51,7 +47,6 @@ SAFETY_RULES = [
     {
         "rule_id": "RULE_105",
         "category": "Clean Competitive Banter (Allowed)",
-        "label": 0,
         "content": (
             "RULE 105: Permissible Competitive Gaming Banter.\n"
             "• Allowed: Normal game-related callouts, friendly rivalry, emotional reactions to gameplay, and light competitive teasing "
@@ -64,7 +59,6 @@ SAFETY_RULES = [
     {
         "rule_id": "RULE_106",
         "category": "General Vulgarity & Profanity Outbursts",
-        "label": 1,
         "content": (
             "RULE 106: General Toxicity, Excessive Vulgarity & Aggressive Profanity.\n"
             "• Prohibited: Aggressive outbursts, excessive swearing, telling other players to shut up or fuck off in a hostile tone "
@@ -76,7 +70,6 @@ SAFETY_RULES = [
     {
         "rule_id": "RULE_107",
         "category": "Hate Speech & Identity Discrimination",
-        "label": 2,
         "content": (
             "RULE 107: Hate Speech, Racial Slurs & Bigotry.\n"
             "• Prohibited: Promoting hatred, discrimination, or using slurs based on race, ethnicity, religion, nationality, disability, or sexual orientation.\n"
@@ -87,7 +80,6 @@ SAFETY_RULES = [
     {
         "rule_id": "RULE_108",
         "category": "Real-World Threats & Doxxing",
-        "label": 2,
         "content": (
             "RULE 108: Real-World Threats, Violence & Doxxing.\n"
             "• Prohibited: Threatening real-world physical violence, swatting, or leaking/publishing another player's private personal information (IP address, real name, home address, phone number).\n"
@@ -97,55 +89,10 @@ SAFETY_RULES = [
     {
         "rule_id": "RULE_109",
         "category": "Spam & Commercial Scams",
-        "label": 1,
         "content": (
             "RULE 109: Commercial Spam, Phishing & Account Scams.\n"
             "• Prohibited: Repeatedly spamming chat lines, advertising external commercial sites, free skin/currency scams, phishing links, or boosting services.\n"
             "• Severity: LOW to MEDIUM. Recommended Action: Lobby Mute"
-        )
-    },
-    {
-        "rule_id": "RULE_110",
-        "category": "Self-Harm Slang & Evasive Terms",
-        "label": 2,
-        "content": (
-            "RULE 110: Gaming Slang - Self-Harm Encouragement.\n"
-            "• 'kys' means 'kill yourself' and is severe toxicity (class 2). "
-            "Treat evasive forms such as 'k.y.s' and 'k-y-s' the same way.\n"
-            "• Severity: CRITICAL. Recommended Action: Permanent Permaban & Escalate"
-        )
-    },
-    {
-        "rule_id": "RULE_111",
-        "category": "Gameplay Comparison Slang",
-        "label": 1,
-        "content": (
-            "RULE 111: Gaming Slang - Diff and Gap.\n"
-            "• 'diff' and 'gap' refer to a skill difference. When used as an insult, "
-            "classify as mild toxicity (class 1), not severe hate speech.\n"
-            "• Severity: LOW to MEDIUM. Recommended Action: Lobby Mute"
-        )
-    },
-    {
-        "rule_id": "RULE_112",
-        "category": "Competitive Taunt Slang",
-        "label": 1,
-        "content": (
-            "RULE 112: Gaming Slang - GG EZ.\n"
-            "• 'gg ez' means 'good game, easy' and is usually a taunt or mild "
-            "toxicity (class 1), unless the surrounding context escalates it.\n"
-            "• Severity: LOW to MEDIUM. Recommended Action: Lobby Mute"
-        )
-    },
-    {
-        "rule_id": "RULE_113",
-        "category": "Forfeit Request Slang",
-        "label": 0,
-        "content": (
-            "RULE 113: Gaming Slang - FF at 15.\n"
-            "• 'ff at 15' is a request to forfeit at fifteen minutes. A neutral "
-            "strategy request is class 0; an insulting or hostile use is class 1.\n"
-            "• Severity: NONE to LOW. Recommended Action: No Action unless context escalates"
         )
     }
 ]

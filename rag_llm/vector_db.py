@@ -1,10 +1,6 @@
 import chromadb
 from chromadb.utils import embedding_functions
-
-try:
-    from .safety_policies import SAFETY_RULES
-except ImportError:
-    from safety_policies import SAFETY_RULES
+from safety_policies import SAFETY_RULES
 
 def initialize_vector_store():
     print("Initializing ChromaDB Vector Store...")
@@ -16,22 +12,18 @@ def initialize_vector_store():
     )
 
     try:
-        chroma_client.delete_collection("esports_safety_rules")
+        chroma_client.delete_collection("game_safety_policies")
     except Exception:
         pass
 
     collection = chroma_client.create_collection(
-        name="esports_safety_rules",
+        name="game_safety_policies",
         embedding_function=embedding_func
     )
 
     documents = [rule["content"] for rule in SAFETY_RULES]
     metadatas = [
-        {
-            "rule_id": rule["rule_id"],
-            "category": rule["category"],
-            "label": rule.get("label", 0),
-        }
+        {"rule_id": rule["rule_id"], "category": rule["category"]} 
         for rule in SAFETY_RULES
     ]
     ids = [rule["rule_id"] for rule in SAFETY_RULES]
@@ -64,7 +56,6 @@ def query_top_rules(vector_store, text: str, n_results: int = 2, distance_thresh
                     "content": doc,
                     "rule_id": meta.get("rule_id", "UNKNOWN"),
                     "category": meta.get("category", "General"),
-                    "label": meta.get("label", 0),
                     "distance": dist
                 })
     

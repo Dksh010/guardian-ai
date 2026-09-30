@@ -5,12 +5,12 @@ joblib
 matplotlib
 numpy
 pandas
+pydantic
+python-dotenv
 scikit-learn
 seaborn
-xgboost
 chromadb
 sentence-transformers
 google-genai
-python-dotenv
-pydantic
 streamlit
+xgboost
