@@ -11,12 +11,17 @@ from prompts import SYSTEM_INSTRUCTION, SafetyAuditResult, build_audit_prompt
 load_dotenv()
 
 class GuardianEngine:
+    """I coordinate policy retrieval, rolling context, and structured Gemini audits."""
     def __init__(self, model_name="gemini-3.5-flash-lite"):
+        """I initialize the Gemini client and in-memory policy/context state."""
         print("Initializing Guardian AI Engine...")
         
+        # The Google SDK reads GOOGLE_API_KEY from the process environment or loaded .env.
         self.client = genai.Client()
+        # Callers can override the default model while keeping the same response schema.
         self.model_name = model_name
 
+        # The store and buffer are per-engine instances so each lobby has isolated context.
         self.vector_store = initialize_vector_store()
 
         self.buffer = ChatBuffer(max_history=5)
@@ -24,11 +29,16 @@ class GuardianEngine:
         print("Guardian AI Engine ready!\n")
 
     def audit_message(self, sender: str, text: str) -> dict:
+        """I retrieve relevant rules and request a schema-constrained audit for one message."""
         matched_rules = query_top_rules(self.vector_store, text, n_results=2)
         
+        # I pass both retrieved candidates to the prompt but attach the first as display metadata.
         retrieved_rules_text = "\n\n".join([r["content"] for r in matched_rules])
+        # query_top_rules guarantees at least a matching policy or its clean-play sentinel.
         primary_match = matched_rules[0]
 
+        # I snapshot earlier messages before appending the target so it appears only in its
+        # dedicated prompt field rather than being duplicated in the preceding transcript.
         chat_context = self.buffer.get_formatted_context()
 
         self.buffer.add_message(sender, text)
@@ -39,6 +49,7 @@ class GuardianEngine:
             retrieved_rule=retrieved_rules_text
         )
 
+        # JSON mode and the Pydantic schema constrain the response to the dashboard's fields.
         config = types.GenerateContentConfig(
             system_instruction=SYSTEM_INSTRUCTION,
             response_mime_type="application/json",
@@ -52,6 +63,7 @@ class GuardianEngine:
         )
         response = chat.send_message(prompt)
 
+        # The engine expects valid JSON; parse errors remain visible to the caller.
         audit_data = json.loads(response.text)
         
         audit_data["retrieved_rule_id"] = primary_match["rule_id"]
@@ -60,6 +72,7 @@ class GuardianEngine:
         return audit_data
 
     def reset_chat(self):
+        """I clear prior messages so the next audit starts a fresh lobby context."""
         self.buffer.clear()
 
 

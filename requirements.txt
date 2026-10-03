@@ -7,7 +7,7 @@ numpy
 pandas
 pydantic
 python-dotenv
-scikit-learn
+scikit-learn==1.9.0
 seaborn
 chromadb
 sentence-transformers

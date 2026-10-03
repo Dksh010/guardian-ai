@@ -3,14 +3,19 @@ from chromadb.utils import embedding_functions
 from safety_policies import SAFETY_RULES
 
 def initialize_vector_store():
+    """I create an in-memory Chroma collection containing embedded safety policies."""
     print("Initializing ChromaDB Vector Store...")
 
+    # The default client is process-local, so this policy index is rebuilt at engine startup.
     chroma_client = chromadb.Client()
 
+    # I use the same compact sentence encoder for both policy documents and query messages.
     embedding_func = embedding_functions.SentenceTransformerEmbeddingFunction(
         model_name="all-MiniLM-L6-v2"
     )
 
+    # I replace a prior collection in this client; the broad guard also suppresses other
+    # deletion errors, after which collection creation will still report name conflicts.
     try:
         chroma_client.delete_collection("game_safety_policies")
     except Exception:
@@ -21,6 +26,7 @@ def initialize_vector_store():
         embedding_function=embedding_func
     )
 
+    # Chroma stores policy text for semantic search and metadata for readable audit labels.
     documents = [rule["content"] for rule in SAFETY_RULES]
     metadatas = [
         {"rule_id": rule["rule_id"], "category": rule["category"]} 
@@ -39,6 +45,9 @@ def initialize_vector_store():
 
 
 def query_top_rules(vector_store, text: str, n_results: int = 2, distance_threshold: float = 1.05):
+    """I return the nearest policies that satisfy the configured embedding-distance cutoff."""
+    # I use a fixed prototype cutoff to keep distant policies out of the moderation prompt.
+    # Chroma returns parallel nested lists, with the outer list representing this single query.
     results = vector_store.query(
         query_texts=[text],
         n_results=n_results
@@ -50,6 +59,7 @@ def query_top_rules(vector_store, text: str, n_results: int = 2, distance_thresh
         documents = results["documents"][0]
         metadatas = results["metadatas"][0]
 
+        # I discard distant matches rather than passing weakly related policy text to the audit.
         for doc, meta, dist in zip(documents, metadatas, distances):
             if dist <= distance_threshold:
                 rules.append({
@@ -59,6 +69,7 @@ def query_top_rules(vector_store, text: str, n_results: int = 2, distance_thresh
                     "distance": dist
                 })
     
+    # The sentinel keeps downstream prompts and UI metadata defined when retrieval finds no fit.
     if not rules:
         rules.append({
             "content": "POLICY_NONE: General chat policy. Standard benign conversation requiring no safety action.",

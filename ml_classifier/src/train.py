@@ -20,11 +20,8 @@ from sklearn.neural_network import MLPClassifier
 from xgboost import XGBClassifier
 
 def train_hardened_models():
-    """
-    Loads processed text data, builds TF-IDF features, trains 7 tuned models 
-    with 5-fold stratified cross-validation, and saves all artifacts.
-    """
-    # 1. Load processed training data
+    """I cross-validate and fit the seven classical configurations, then save their artifacts."""
+    # I use the fixed training partition so the held-out test rows do not influence fitting.
     train_path = os.path.join("ml_classifier", "data", "processed", "train.csv")
     print(f"Loading training data from {train_path}...")
     train_df = pd.read_csv(train_path)
@@ -32,39 +29,43 @@ def train_hardened_models():
     X_train = train_df['text'].fillna("")
     y_train = train_df['target']
     
-    # 2. Feature Engineering: TF-IDF with guarded parameters to prevent overfitting
+    # I fit TF-IDF on training text only to avoid vocabulary/IDF leakage from evaluation data;
+    # unigrams and bigrams capture both individual terms and short phrases within 4,000 features.
     print("Fitting TF-IDF vectorizer (max_features=4000, min_df=2, ngram_range=(1,2))...")
     vectorizer = TfidfVectorizer(max_features=4000, min_df=2, ngram_range=(1, 2))
     X_train_tfidf = vectorizer.fit_transform(X_train)
     
-    # Save vectorizer for evaluation and CLI use
+    # The CLI and evaluator must reuse this fitted vocabulary and IDF weighting.
     os.makedirs(os.path.join("ml_classifier", "src", "models"), exist_ok=True)
     joblib.dump(vectorizer, "ml_classifier/src/models/tfidf_vectorizer.pkl")
     
-    # 3. Define 5-fold stratified cross-validation setup (reproducibility anchor)
+    # Each fold keeps class proportions similar, while shuffling with a fixed seed makes
+    # the accuracy comparison reproducible for the same input data.
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     
-    # 4. Define 7 Tuned Models (Avoiding lazy default parameters)
+    # I set the principal estimator parameters explicitly so the evaluated configurations
+    # are visible and reproducible rather than relying on changing library defaults.
     models = {
         "Naive_Bayes": MultinomialNB(alpha=1.0),
         
-        # Tuned Logistic Regression: L2 regularization C=1.0 with increased max_iter for convergence
+        # L2-regularized logistic baseline; the iteration cap gives optimization room to converge.
         "Logistic_Regression": LogisticRegression(C=1.0, max_iter=1000, random_state=42),
         
-        # Tuned Linear SVM: hinge loss with optimized alpha regularization
+        # Hinge-loss linear classifier with L2 regularization for sparse TF-IDF features.
         "Linear_SVM": SGDClassifier(loss='hinge', penalty='l2', alpha=1e-4, max_iter=1000, random_state=42),
         
-        # Tuned Random Forest: controlled depth and estimators to mitigate sparse text overfitting
+        # The split minimum constrains very small leaves; no maximum depth is imposed here.
         "Random_Forest": RandomForestClassifier(n_estimators=150, max_depth=None, min_samples_split=5, random_state=42),
         
-        # Tuned XGBoost: learning rate and tree depth optimized for text features
+        # Boosted trees use a fixed estimator count, learning rate, and depth on the TF-IDF matrix.
         "XGBoost": XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=6, eval_metric='logloss', random_state=42),
         
-        # Neural Network (MLP Classifier): Non-linear multi-layer perceptron (ReLU activation, Adam optimizer)
+        # The two hidden layers allow nonlinear interactions; Adam and ReLU are explicit choices.
         "Neural_Network": MLPClassifier(hidden_layer_sizes=(100, 50), activation='relu', solver='adam', alpha=0.0001, max_iter=300, random_state=42)
     }
     
-    # Train individual models and evaluate via Stratified CV
+    # CV scores estimate training-partition accuracy; each saved model below is refit on all
+    # training rows after its independent cross-validation estimate.
     trained_models = {}
     print("\n--- TRAINING & CROSS-VALIDATION SCORES (7-MODEL SUITE) ---")
     for name, model in models.items():
@@ -72,12 +73,12 @@ def train_hardened_models():
         scores = cross_val_score(model, X_train_tfidf, y_train, cv=cv, scoring='accuracy')
         print(f"-> {name:<20} | CV Accuracy: {scores.mean():.4f} (+/- {scores.std():.4f})")
         
-        # Fit on full training set and serialize artifact
+        # The CLI/evaluator load these named artifacts, so names remain aligned with filenames.
         model.fit(X_train_tfidf, y_train)
         trained_models[name] = model
         joblib.dump(model, f"ml_classifier/src/models/{name.lower()}_model.pkl")
     
-    # 5. Build and Train Hard-Voting Ensemble combining the top performers
+    # Hard voting selects the most common predicted class across all six fitted base models.
     print("\nTraining Voting Ensemble Classifier (Hard Voting)...")
     voting_clf = VotingClassifier(
         estimators=[

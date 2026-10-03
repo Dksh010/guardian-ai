@@ -11,23 +11,18 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 def clean_text(text: str) -> str:
-    """
-    Cleans raw chat text by lowercasing, stripping URLs/HTML, 
-    expanding basic contractions, and normalising whitespace.
-    """
+    """I normalize one chat message into the text representation used for training."""
     if not isinstance(text, str):
         return ""
     
-    # Lowercase
+    # I lowercase before cleaning so case variants share the same vocabulary entries.
     text = text.lower()
     
-    # Strip HTML tags
+    # I remove markup and links because they are not retained as semantic chat features.
     text = re.sub(r'<.*?>', '', text)
-    
-    # Strip URLs
     text = re.sub(r'https?://\S+|www\.\S+', '', text)
     
-    # Basic contractions and normalisation
+    # I expand common contractions before punctuation removal so negation remains explicit.
     text = re.sub(r"can't", "can not", text)
     text = re.sub(r"won't", "will not", text)
     text = re.sub(r"n't", " not", text)
@@ -39,29 +34,27 @@ def clean_text(text: str) -> str:
     text = re.sub(r"'ve", " have", text)
     text = re.sub(r"'m", " am", text)
     
-    # Remove special characters/punctuation keep letters/numbers/spaces
+    # I keep letters, digits, and whitespace so punctuation does not create separate tokens.
     text = re.sub(r'[^a-z0-9\s]', '', text)
     
-    # Collapse multiple spaces
+    # I normalize spaces left by removed markup, URLs, and punctuation.
     text = re.sub(r'\s+', ' ', text).strip()
     
     return text
 
 def load_and_preprocess_data(filepath: str):
-    """
-    Loads raw CSV data, drops nulls, applies text cleaning, 
-    and executes a stratified 80/10/10 split.
-    """
+    """I clean labeled chat rows, create reproducible stratified splits, and save them."""
     print(f"Loading data from {filepath}...")
     df = pd.read_csv(filepath)
     
-    # Using the exact columns from your inspect script: 'text' and 'target'
+    # I require both message and target because neither can be used to train a labeled example
+    # when missing; the project CSV schema names these columns text and target.
     df = df.dropna(subset=['text', 'target'])
     
     print("Cleaning text data...")
     df['cleaned_text'] = df['text'].apply(clean_text)
     
-    # Remove empty strings after cleaning
+    # Cleaning may erase a row made only of markup or a URL, so it cannot supply text features.
     df = df[df['cleaned_text'].str.len() > 0]
     
     X = df['cleaned_text']
@@ -70,19 +63,20 @@ def load_and_preprocess_data(filepath: str):
     print(f"Class distribution:\n{y.value_counts(normalize=True)}")
     
     print("Performing stratified 80/10/10 split (random_state=42)...")
-    # First split: 80% train, 20% temp (for val/test)
+    # I reserve 20% first, then split it evenly to produce 80/10/10 overall.
+    # Stratification preserves each label's approximate share in each partition.
     X_train, X_temp, y_train, y_temp = train_test_split(
         X, y, test_size=0.20, random_state=42, stratify=y
     )
     
-    # Second split: 50% val, 50% test of that 20% (giving 10% / 10% overall)
+    # I use the same seed and label stratification for a reproducible validation/test split.
     X_val, X_test, y_val, y_test = train_test_split(
         X_temp, y_temp, test_size=0.50, random_state=42, stratify=y_temp
     )
     
     print(f"Split complete -> Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
     
-    # Save processed splits for easy loading later
+    # I keep all three partitions in the paths expected by training and evaluation scripts.
     os.makedirs(os.path.join("ml_classifier", "data", "processed"), exist_ok=True)
     pd.DataFrame({'text': X_train, 'target': y_train}).to_csv("ml_classifier/data/processed/train.csv", index=False)
     pd.DataFrame({'text': X_val, 'target': y_val}).to_csv("ml_classifier/data/processed/val.csv", index=False)

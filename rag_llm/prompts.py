@@ -2,6 +2,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 class SafetyAuditResult(BaseModel):
+    """I define the typed fields and allowed values expected from a moderation audit."""
     is_flagged: bool = Field(
         description="True if the target message violates the community policy; False if clean banter or allowed behavior."
     )
@@ -21,6 +22,7 @@ class SafetyAuditResult(BaseModel):
         description="The automated moderation action recommended."
     )
 
+# This instruction supplies the stable policy-reading principles shared by each Gemini request.
 SYSTEM_INSTRUCTION = """
 You are "Guardian AI", an expert Trust & Safety Auditor for online multiplayer games.
 Your task is to analyze live player chat logs against established community guidelines and produce an objective safety audit.
@@ -35,6 +37,7 @@ KEY AUDIT PRINCIPLES:
 """
 
 def build_audit_prompt(chat_context: str, target_message: str, retrieved_rule: str) -> str:
+    """I combine retrieved policy, prior chat, and the current target into one audit prompt."""
     return f"""
 === RETRIEVED COMMUNITY POLICY ===
 {retrieved_rule}

@@ -1,14 +1,18 @@
 class ChatBuffer:
+    """I retain only the newest lobby messages used as context for moderation."""
     def __init__(self, max_history=5):
+        """I set the maximum number of messages kept in this rolling context."""
         self.max_history = max_history
         self.history = []
 
     def add_message(self, sender: str, text: str):
+        """I append a sender/message record and evict the oldest record past the limit."""
         self.history.append({"sender": sender, "text": text})
         if len(self.history) > self.max_history:
             self.history.pop(0)
 
     def get_formatted_context(self) -> str:
+        """I render the stored messages in order for inclusion in the audit prompt."""
         if not self.history:
             return "No prior chat context."
         
@@ -18,6 +22,7 @@ class ChatBuffer:
         return "\n".join(formatted)
 
     def clear(self):
+        """I remove all retained messages when a lobby is reset."""
         self.history = []
 
 

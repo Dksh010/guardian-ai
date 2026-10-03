@@ -14,11 +14,8 @@ import seaborn as sns
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix
 
 def evaluate_models():
-    """
-    Loads test data, vectorizer, and all 7 trained models, evaluates performance, 
-    and saves metrics and confusion matrix plots.
-    """
-    # 1. Load held-out test data
+    """I evaluate saved classifiers once on held-out data and write metrics and plots."""
+    # I keep test rows separate from fitting so these scores estimate held-out performance.
     test_path = os.path.join("ml_classifier", "data", "processed", "test.csv")
     print(f"Loading test data from {test_path}...")
     test_df = pd.read_csv(test_path)
@@ -26,13 +23,13 @@ def evaluate_models():
     X_test = test_df['text'].fillna("")
     y_test = test_df['target']
     
-    # 2. Load TF-IDF vectorizer and transform test text
+    # I reuse the training vocabulary and IDF weights rather than fitting features on test text.
     vectorizer_path = "ml_classifier/src/models/tfidf_vectorizer.pkl"
     print(f"Loading TF-IDF vectorizer from {vectorizer_path}...")
     vectorizer = joblib.load(vectorizer_path)
     X_test_tfidf = vectorizer.transform(X_test)
     
-    # 3. Define the full 7-model suite to evaluate
+    # These names define the artifact lookup order and must match train.py's serialized files.
     model_names = [
         "Naive_Bayes", 
         "Logistic_Regression", 
@@ -44,11 +41,13 @@ def evaluate_models():
     ]
     
     results = []
+    # Evaluation artifacts share one directory so the table and per-model plots stay together.
     os.makedirs("comparison/results", exist_ok=True)
     
     print("\n--- EVALUATING 7 MODELS ON HELD-OUT TEST SET ---")
     for name in model_names:
         model_path = f"ml_classifier/src/models/{name.lower()}_model.pkl"
+        # Missing artifacts are skipped so partially trained model sets can still be inspected.
         if not os.path.exists(model_path):
             print(f"Warning: Model file {model_path} not found. Skipping.")
             continue
@@ -56,7 +55,8 @@ def evaluate_models():
         model = joblib.load(model_path)
         y_pred = model.predict(X_test_tfidf)
         
-        # Compute macro-averaged metrics for multi-class fairness
+        # Macro averaging weights each class equally; zero_division keeps undefined class
+        # precision/recall explicit as zero instead of aborting this evaluation.
         acc = accuracy_score(y_test, y_pred)
         precision, recall, f1, _ = precision_recall_fscore_support(y_test, y_pred, average='macro', zero_division=0)
         
@@ -70,7 +70,7 @@ def evaluate_models():
             "Macro_F1": round(f1, 4)
         })
         
-        # Generate Confusion Matrix Plot for report
+        # Rows in this matrix are true labels and columns are predicted labels.
         cm = confusion_matrix(y_test, y_pred)
         plt.figure(figsize=(6, 5))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
@@ -83,7 +83,7 @@ def evaluate_models():
         plt.savefig(plot_path, dpi=300)
         plt.close()
 
-    # 4. Save master summary CSV leaderboard
+    # The report is ranked by macro-F1 so minority classes contribute equally to model order.
     results_df = pd.DataFrame(results).sort_values(by="Macro_F1", ascending=False)
     csv_output = "comparison/results/model_comparison.csv"
     results_df.to_csv(csv_output, index=False)

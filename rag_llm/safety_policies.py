@@ -1,4 +1,5 @@
 SAFETY_RULES = [
+    # I keep protected-identity harassment separate so the audit can cite a specific policy.
     {
         "rule_id": "RULE_101",
         "category": "Gender Harassment & Sexism",
@@ -11,6 +12,7 @@ SAFETY_RULES = [
             "• Severity: HIGH. Recommended Action: Temporary Ban"
         )
     },
+    # I prioritize minor-related private-information requests and off-platform contact.
     {
         "rule_id": "RULE_102",
         "category": "Child Safety & Predatory Grooming",
@@ -22,6 +24,7 @@ SAFETY_RULES = [
             "• Severity: CRITICAL / ZERO-TOLERANCE. Recommended Action: Permanent Permaban & Escalate"
         )
     },
+    # I treat obscured self-harm encouragement as a violation rather than harmless spelling.
     {
         "rule_id": "RULE_103",
         "category": "Evasive Toxicity, Self-Harm & Leetspeak Bypasses",
@@ -33,6 +36,7 @@ SAFETY_RULES = [
             "• Severity: CRITICAL. Recommended Action: Permanent Permaban & Escalate"
         )
     },
+    # I distinguish repeated targeting from an isolated competitive disagreement.
     {
         "rule_id": "RULE_104",
         "category": "Targeted Bullying & Multi-Turn Harassment",
@@ -44,6 +48,7 @@ SAFETY_RULES = [
             "• Severity: MEDIUM-HIGH. Recommended Action: Temporary Ban"
         )
     },
+    # I state an explicit allowance so retrieval can ground benign competitive banter.
     {
         "rule_id": "RULE_105",
         "category": "Clean Competitive Banter (Allowed)",
@@ -56,6 +61,7 @@ SAFETY_RULES = [
             "• Severity: NONE (Clean Play). Recommended Action: No Action"
         )
     },
+    # I separate hostile profanity from identity-based hate and higher-severity threats.
     {
         "rule_id": "RULE_106",
         "category": "General Vulgarity & Profanity Outbursts",
@@ -67,6 +73,7 @@ SAFETY_RULES = [
             "• Severity: LOW to MEDIUM. Recommended Action: Lobby Mute"
         )
     },
+    # I give identity-based hate its own rule because severity does not depend on game context.
     {
         "rule_id": "RULE_107",
         "category": "Hate Speech & Identity Discrimination",
@@ -77,6 +84,7 @@ SAFETY_RULES = [
             "• Severity: HIGH to CRITICAL. Recommended Action: Permanent Permaban & Escalate"
         )
     },
+    # I group physical threats and disclosure of private information as urgent risks.
     {
         "rule_id": "RULE_108",
         "category": "Real-World Threats & Doxxing",
@@ -86,6 +94,7 @@ SAFETY_RULES = [
             "• Severity: CRITICAL. Recommended Action: Permanent Permaban & Escalate"
         )
     },
+    # I include spam and scams so the knowledge base covers non-interpersonal chat abuse.
     {
         "rule_id": "RULE_109",
         "category": "Spam & Commercial Scams",

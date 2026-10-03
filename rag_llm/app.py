@@ -10,6 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# These small CSS overrides keep longer player messages readable inside Streamlit containers.
 st.markdown("""
 <style>
     .stTextInput > div > div > input {
@@ -25,6 +26,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Streamlit reruns this script on interaction, so the engine and lobby state live in the session.
 if "engine" not in st.session_state:
     st.session_state.engine = GuardianEngine()
 
@@ -35,6 +37,7 @@ if "latest_audit" not in st.session_state:
     st.session_state.latest_audit = None
 
 def process_message(sender: str, text: str):
+    """I audit one non-empty player message and store it for both dashboard panels."""
     if not text.strip():
         return
     
@@ -54,6 +57,7 @@ with st.sidebar:
 
     st.markdown("##### ⚡ Quick Scenarios")
     
+    # Each preset resets the engine context first so scenarios do not contaminate one another.
     col_s1, col_s2 = st.columns(2)
     with col_s1:
         if st.button(" Clean Banter", use_container_width=True):
@@ -88,6 +92,7 @@ with st.sidebar:
         st.session_state.latest_audit = None
         st.rerun()
 
+# The two columns keep the chronological messages separate from the latest audit details.
 st.title("🎮 Live Lobby Moderation")
 st.caption("Context-Aware RAG Engine powered by **ChromaDB** & **Gemini 3.5 Flash**")
 
@@ -96,6 +101,7 @@ col_left, col_right = st.columns([1.1, 1], gap="medium")
 with col_left:
     st.subheader("💬 Chat Feed")
     
+    # A bounded-height container keeps long sessions from expanding the whole page.
     chat_container = st.container(height=320)
     with chat_container:
         if not st.session_state.chat_history:
@@ -112,6 +118,7 @@ with col_left:
                     st.markdown(f"**{msg['sender']}**: {msg['text']}")
                     st.caption(f"Status: `{badge}`")
 
+    # A form batches sender/message values into one audit action and clears them after submit.
     with st.form("send_message_form", clear_on_submit=True):
         input_col1, input_col2 = st.columns([1, 3])
         with input_col1:
@@ -134,6 +141,7 @@ with col_right:
         is_flagged = audit.get("is_flagged", False)
         severity = audit.get("severity", "NONE")
         
+        # The color communicates the returned severity without changing the audit itself.
         if not is_flagged:
             st.success(f"**CLEAN PLAY** — Severity: {severity}")
         else:
@@ -155,6 +163,7 @@ with col_right:
             st.markdown(f"**Violated Policy:** `{audit.get('violated_rule', 'None')}`")
             st.markdown(f"**Reasoning:** {audit.get('summary_reasoning', 'N/A')}")
 
+        # Retrieval metadata helps operators see which policy context accompanied the result.
         with st.expander("🔍 ChromaDB Vector Match", expanded=True):
             rule_id = audit.get('retrieved_rule_id', 'NONE')
             category = audit.get('retrieved_rule_category', 'Standard Clean Conversation')

@@ -2,8 +2,11 @@ import json
 from rag_llm.engine import GuardianEngine
 
 def run_test_suite():
+    """I exercise representative clean and harmful multi-message moderation scenarios."""
+    # I reuse one engine but clear its context between scenarios to isolate each test case.
     engine = GuardianEngine()
 
+    # Each scenario supplies preceding context where the target message needs it for interpretation.
     scenarios = [
         {
             "title": "Scenario 1: Clean Banter",
@@ -41,6 +44,7 @@ def run_test_suite():
         print(f"==================================================")
         engine.reset_chat()
 
+        # I submit messages in order so later audits can observe earlier lobby context.
         for sender, text in scenario["messages"]:
             print(f"\nIncoming Message -> {sender}: '{text}'")
             result = engine.audit_message(sender, text)
